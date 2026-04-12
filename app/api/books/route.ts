@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { connectDB, sql } from "@/lib/db";
 import { successResponse, errorResponse } from "@/lib/response";
 
+/** Cold SQL connections can exceed Vercel’s default (10s) on paid tiers. */
+export const maxDuration = 25;
+
 // GET all books
 export async function GET() {
   try {
@@ -28,7 +31,8 @@ export async function GET() {
 
     return NextResponse.json(successResponse(books));
   } catch (err: any) {
-    return NextResponse.json(errorResponse(err.message));
+    const message = err?.message ?? String(err);
+    return NextResponse.json(errorResponse(message), { status: 500 });
   }
 }
 
